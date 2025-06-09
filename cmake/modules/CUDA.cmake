@@ -138,8 +138,8 @@ if(USE_CUDA)
   endif(USE_NVTX)
 
   # Add CUDA builtins to RelaxVM
-  tvm_file_glob(GLOB RELAX_VM_CUDA_BUILTIN_SRC_CC src/runtime/relax_vm/cuda/*.cc)
-  list(APPEND RUNTIME_SRCS ${RELAX_VM_CUDA_BUILTIN_SRC_CC})
+  tvm_file_glob(GLOB VM_CUDA_BUILTIN_SRC_CC src/runtime/vm/cuda/*.cc)
+  list(APPEND RUNTIME_SRCS ${VM_CUDA_BUILTIN_SRC_CC})
 
   if(USE_CUTLASS)
     if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
