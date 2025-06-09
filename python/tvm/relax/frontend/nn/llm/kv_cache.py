@@ -1072,6 +1072,11 @@ def _get_prefill_kernel_config(h_kv, h_q, d, dtype, target: Target):
         LOAD_VEC = 16 // ((DataType(dtype).bits + 7) // 8)  # 16 bytes
         NUM_BLKS = group_size * 8
 
+        tile_x = 32
+        tile_z = 4
+        if (tile_y * tile_z) % (bdx * num_warps) != 0:
+            tile_z = 16
+
     check_thread_limits(target, bdx=bdx, bdy=num_warps, bdz=1, gdz=1)
 
     return NUM_BLKS, LOAD_VEC, group_size, bdx, num_warps, tile_x, tile_y, tile_z
@@ -1666,11 +1671,12 @@ def _attention_decode(
         # to avoid register spill
         THREAD_LIMIT = 256
         TILE_SIZE_PER_BDX = 1
+
+    VEC_SIZE = min(max(8 // qkv_dtype_bytes, D // 32), 4)
     max_num_threads_per_block = get_max_num_threads_per_block(target)
     thread_limit = min(max_num_threads_per_block, THREAD_LIMIT)
 
     GROUP_SIZE = H_qo // H_kv
-    VEC_SIZE = min(max(8 // qkv_dtype_bytes, D // 32), 4)
     bdx = D // VEC_SIZE
     bdy = GROUP_SIZE
     while bdx * bdy > thread_limit and bdy > 1:
